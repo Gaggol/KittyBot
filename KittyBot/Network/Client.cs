@@ -30,18 +30,25 @@ namespace KittyBot.Network
 
         public Client() {
             HttpClient = new HttpClient() {
-                BaseAddress = new Uri("https://discord.com/api")
+                BaseAddress = new Uri("https://discord.com/")
             };
             HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bot", Program.Token);
             HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd($"DiscordBot ({Program.URL}, {Program.Version})");
         }
 
         public async Task GetGateway() {
-            var response = await HttpClient.GetAsync("/gateway");
+            var response = await HttpClient.GetAsync("/api/v6/gateway");
+            if(response.IsSuccessStatusCode == false) {
+                Console.WriteLine(response.ToString());
+            }
             JObject obj = JObject.Parse(await response.Content.ReadAsStringAsync());
             if(response.StatusCode == HttpStatusCode.OK) {
-                WSS wss = new WSS((string)obj["url"]!);
-                await wss.Connect();
+                if(obj.TryGetValue("url", out var url)) {
+                    if(url.Type != JTokenType.Null) {
+                        WSS wss = new WSS((string)url!);
+                        await wss.Connect();
+                    }
+                }
             }
         }
     }

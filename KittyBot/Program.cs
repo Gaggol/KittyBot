@@ -14,7 +14,7 @@ namespace KittyBot
         public static string URL { get; private set; } = string.Empty;
         public static string Version { get; private set; } = string.Empty;
 
-        private static void Main(string[] args) {
+        private static async Task Main(string[] args) {
             string[] _envTokens = File.ReadAllLines(Path.Combine("./", ".env"));
 
             Token = _envTokens[0].Split("=")[1];
@@ -22,7 +22,7 @@ namespace KittyBot
             PublicKey = _envTokens[2].Split("=")[1];
             URL = _envTokens[3].Split("=")[1];
             Version = _envTokens[4].Split("=")[1];
-
+            /*
             Payload handShake = new Payload();
             handShake.op = (int)GatewayOpCodes.Identify;
             handShake.d = new JObject {
@@ -49,8 +49,9 @@ namespace KittyBot
             Console.WriteLine(sb.ToString());
 
             return;
-
-            new Bot().Start();
+            */
+            Client client = new Client();
+            await client.GetGateway();
 
         }
     }

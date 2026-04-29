@@ -44,6 +44,15 @@ namespace KittyBot.Network
             _discordEventManager = new();
             _jitter = Random.Shared.NextDouble();
             _cancelDiscordConnection = new CancellationTokenSource();
+            Console.CancelKeyPress += Console_CancelKeyPress;
+        }
+
+        private void Console_CancelKeyPress(object? sender, ConsoleCancelEventArgs e) {
+            e.Cancel = true;
+            _ = Task.Run(async () => {
+                await Close();
+                Environment.Exit(0);
+            });
         }
 
         public async Task SendPayload(Payload payload, WebSocketMessageType type = WebSocketMessageType.Text) {
@@ -51,6 +60,11 @@ namespace KittyBot.Network
 
             Console.WriteLine($"Sending Payload: {p}");
             byte[] buffer = Encoding.UTF8.GetBytes(p);
+
+            if(buffer.Length > 4096) {
+                Console.WriteLine("TBI: 4096+ bytes payloads");
+                return;
+            }
             await _webSocket.SendAsync(new ArraySegment<byte>(buffer), type, true, _cancelDiscordConnection.Token);
             
         }
@@ -59,8 +73,10 @@ namespace KittyBot.Network
             if(_firstHeartbeat) {
                 _heartbeatInterval += TimeSpan.FromSeconds(_jitter);
             }
-
             while(_webSocket.State == WebSocketState.Open) {
+                if(_cancelDiscordConnection.IsCancellationRequested) {
+                    return;
+                }
                 if(_timer.Elapsed >= _heartbeatInterval) {
                     Console.WriteLine("Sending Heartbeat");
                     if(_heartbeatAcknowledged == false && _firstHeartbeat == false) {
@@ -97,6 +113,7 @@ namespace KittyBot.Network
                     }
                     _heartbeatTries++;
                 }
+                await Task.Delay(1000);
             }
             return;
         }
