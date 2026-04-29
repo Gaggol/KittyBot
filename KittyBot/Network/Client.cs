@@ -1,7 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Net;
 using System.Net.Http.Headers;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 
 namespace KittyBot.Network
 {
@@ -31,6 +34,15 @@ namespace KittyBot.Network
             };
             HttpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bot", Program.Token);
             HttpClient.DefaultRequestHeaders.UserAgent.ParseAdd($"DiscordBot ({Program.URL}, {Program.Version})");
+        }
+
+        public async Task GetGateway() {
+            var response = await HttpClient.GetAsync("/gateway");
+            JObject obj = JObject.Parse(await response.Content.ReadAsStringAsync());
+            if(response.StatusCode == HttpStatusCode.OK) {
+                WSS wss = new WSS((string)obj["url"]!);
+                await wss.Connect();
+            }
         }
     }
 }
