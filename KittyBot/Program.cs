@@ -6,8 +6,7 @@ using Newtonsoft.Json.Linq;
 
 namespace KittyBot
 {
-    internal class Program
-    {
+    internal class Program {
         public static string Token { get; private set; } = string.Empty;
         public static string Id { get; private set; } = string.Empty;
         public static string PublicKey { get; private set; } = string.Empty;
@@ -22,6 +21,7 @@ namespace KittyBot
             PublicKey = _envTokens[2].Split("=")[1];
             URL = _envTokens[3].Split("=")[1];
             Version = _envTokens[4].Split("=")[1];
+
             /*
             Payload handShake = new Payload();
             handShake.op = (int)GatewayOpCodes.Identify;

@@ -1,13 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
-using KittyBot.Network;
 using Newtonsoft.Json.Linq;
 
 namespace KittyBot.DiscordEvents
 {
-    public interface IDiscordEvent
+    public class Ready : IDiscordEvent
     {
-        public void Recieve(JToken d);
+        public void Recieve(JToken d) {
+
+        }
     }
 }

@@ -24,7 +24,6 @@ namespace KittyBot.Network
         private int? _lastSequenceRecieved = null;
         private Task? _heartbeatTask;
         private Task? _recieveEventsTask;
-        private DiscordEventManager _discordEventManager;
 
         private int _heartbeatTries = 0;
         private bool _isZombie = false;
@@ -41,7 +40,6 @@ namespace KittyBot.Network
             Instance = this;
             _webSocket = new();
             _timer = new();
-            _discordEventManager = new();
             _jitter = Random.Shared.NextDouble();
             _cancelDiscordConnection = new CancellationTokenSource();
             Console.CancelKeyPress += Console_CancelKeyPress;
@@ -123,7 +121,7 @@ namespace KittyBot.Network
             handShake.op = (int)GatewayOpCodes.Identify;
             handShake.d = new JObject {
                 { "token", Program.Token },
-                { "intents", Intents.GUILD_MESSAGE_REACTIONS },
+                { "intents", Intents.GUILD_MESSAGE_REACTIONS | Intents.GUILD_MESSAGES | Intents.MESSAGE_CONTENT },
                 { "properties", new JObject {
                     { "os", "windows" },
                     { "browser", "KittyBot" },
@@ -182,7 +180,7 @@ namespace KittyBot.Network
                                 continue;
                             }
                             _lastSequenceRecieved = (int)s!;
-                            _discordEventManager.Read((string)t!, d!);
+                            DiscordEventManager.Read((string)t!, d!);
                             break;
                         }
                         case GatewayOpCodes.HeartbeatACK: {
